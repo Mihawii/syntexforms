@@ -4,10 +4,6 @@ import QuestionPage from "@/components/QuestionPage";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import ClickSpark from "@/components/ClickSpark";
-import StarBorder from "@/components/StarBorder";
-
-const LOGO_PATH = "/branding/logo.svg"; // Place your logo here
 
 const questions = [
   {
@@ -91,18 +87,18 @@ const questions = [
   },
 ];
 
-const cardBg = "bg-neutral-900/95";
-const cardBorder = "border border-white";
-const progressBarBg = "bg-white/30";
-const progressBarFill = "bg-white";
-const buttonPrimary = "bg-white text-black border border-white hover:bg-neutral-100 focus:ring-white";
-const buttonSecondary = "bg-transparent text-white border border-white hover:bg-white hover:text-black focus:ring-white";
+type ReviewPageProps = {
+  onBack: () => void;
+  onSubmit: () => void;
+  answers: Record<string, string>;
+  submitting: boolean;
+};
 
 const ProgressBar = ({ progress, total }: { progress: number; total: number }) => (
   <div className="w-full mb-8">
-    <div className={`h-3 ${progressBarBg} rounded-full overflow-hidden shadow-md border border-white`}>
+    <div className="h-3 bg-white/30 rounded-full overflow-hidden shadow-md border border-white">
       <motion.div
-        className={`h-3 ${progressBarFill} rounded-full shadow-lg`}
+        className="h-3 bg-white rounded-full shadow-lg"
         initial={{ width: 0 }}
         animate={{ width: `${(progress / total) * 100}%` }}
         transition={{ duration: 0.5, ease: "easeInOut" }}
@@ -114,47 +110,13 @@ const ProgressBar = ({ progress, total }: { progress: number; total: number }) =
   </div>
 );
 
-const ReviewPage = ({ onBack, onSubmit, answers, submitting }: any) => (
-  <motion.div
-    className={`flex flex-col items-center justify-center min-h-[60vh] w-full max-w-xl mx-auto ${cardBg} rounded-3xl shadow-2xl p-10 gap-8 backdrop-blur-md ${cardBorder}`}
-    initial={{ opacity: 0, scale: 0.95 }}
-    animate={{ opacity: 1, scale: 1 }}
-    exit={{ opacity: 0, scale: 0.95 }}
-    transition={{ duration: 0.4, ease: "easeInOut" }}
-  >
-    <h2 className="text-3xl font-bold mb-4 text-white drop-shadow">Review your answers</h2>
-    <ul className="w-full flex flex-col gap-4">
-      {questions.map((q) => (
-        <li key={q.key} className="flex flex-col">
-          <span className="font-medium text-white drop-shadow">{q.question}</span>
-          <span className="text-white/80 mt-1">{answers[q.key] || <span className="italic text-white/60">No answer</span>}</span>
-        </li>
-      ))}
-    </ul>
-    <div className="flex w-full justify-between mt-8">
-      <motion.button
-        type="button"
-        onClick={onBack}
-        className={`px-7 py-3 rounded-full ${buttonSecondary} focus:outline-none focus:ring-2 focus:ring-offset-2 text-base font-semibold shadow-md`}
-        whileTap={{ scale: 0.95 }}
-        tabIndex={0}
-        aria-label="Go back to last question"
-      >
-        Back
-      </motion.button>
-      <motion.button
-        type="button"
-        onClick={onSubmit}
-        className={`px-7 py-3 rounded-full ${buttonPrimary} focus:outline-none focus:ring-2 focus:ring-offset-2 text-base font-semibold shadow-lg disabled:opacity-60`}
-        whileTap={{ scale: 0.97 }}
-        disabled={submitting}
-        tabIndex={0}
-        aria-label="Submit application"
-      >
-        {submitting ? "Submitting..." : "Submit"}
-      </motion.button>
+const ReviewPage = ({ onBack, onSubmit, answers, submitting }: ReviewPageProps) => (
+  <div className="min-h-screen flex flex-col items-center justify-center bg-black">
+    <div className="flex flex-col items-center justify-center w-full max-w-xl mx-auto bg-neutral-900/95 rounded-3xl shadow-2xl p-16 gap-8 border border-white">
+      <h2 className="text-4xl font-bold mb-4 text-white text-center">Thank you for applying!</h2>
+      <p className="text-lg text-white/80 text-center max-w-lg">We appreciate your interest. We&apos;ll review your application and get back to you soon.</p>
     </div>
-  </motion.div>
+  </div>
 );
 
 export default function Home() {
@@ -187,24 +149,13 @@ export default function Home() {
   };
 
   if (submitted) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-black">
-        <div className="flex flex-col items-center justify-center w-full max-w-xl mx-auto bg-neutral-900/95 rounded-3xl shadow-2xl p-16 gap-8 border border-white">
-          <h2 className="text-4xl font-bold mb-4 text-white text-center">Thank you for applying!</h2>
-          <p className="text-lg text-white/80 text-center max-w-lg">We appreciate your interest. We'll review your application and get back to you soon.</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (step === questions.length) {
-    return <ReviewPage onBack={() => setStep(step - 1)} onSubmit={handleSubmit} answers={answers} submitting={submitting} />;
+    return <ReviewPage onBack={() => setStep(step - 1)} onSubmit={handleSubmit} answers={answers as Record<string, string>} submitting={submitting} />;
   }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-black py-8 animate-fade-in">
       <motion.div
-        className={`w-full max-w-xl rounded-3xl shadow-2xl ${cardBg} p-10 backdrop-blur-md ${cardBorder} relative`}
+        className="w-full max-w-xl rounded-3xl shadow-2xl bg-neutral-900/95 p-10 backdrop-blur-md border border-white relative"
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 40 }}
@@ -213,21 +164,7 @@ export default function Home() {
         {/* Logo at the top, transparent background, no border, not cropped */}
         <div className="flex justify-center mb-6">
           <Image
-            src={(() => {
-              try {
-                require("../../public/branding/logo.png");
-                return "/branding/logo.png";
-              } catch {}
-              try {
-                require("../../public/branding/logo.jpg");
-                return "/branding/logo.jpg";
-              } catch {}
-              try {
-                require("../../public/branding/logo.jpeg");
-                return "/branding/logo.jpeg";
-              } catch {}
-              return "/branding/logo.svg";
-            })()}
+            src="/branding/logo.svg"
             alt="Logo"
             width={96}
             height={96}
@@ -241,15 +178,12 @@ export default function Home() {
           <QuestionPage
             key={q.key}
             question={q.question}
-            onNext={isLast ? () => setStep(step + 1) : handleNext}
-            onBack={!isFirst ? handleBack : undefined}
-            disableNext={!value}
             progress={step + 1}
             total={questions.length + 1}
           >
             {q.inputType === "radio" && q.options && (
               <div className="flex flex-col gap-2 mt-2">
-                {q.options.map((opt) => (
+                {q.options.map((opt: string) => (
                   <motion.label
                     key={opt}
                     className="flex items-center gap-3 cursor-pointer rounded-full px-4 py-2 transition-colors bg-neutral-800/80 hover:bg-white/10 border border-white"
@@ -261,7 +195,7 @@ export default function Home() {
                       name={q.key}
                       value={opt}
                       checked={value === opt}
-                      onChange={() => setAnswer(q.key as any, opt)}
+                      onChange={() => setAnswer(q.key as keyof typeof answers, opt)}
                       className="accent-white rounded-full w-5 h-5 border border-white"
                       tabIndex={0}
                       aria-label={opt}
@@ -275,7 +209,7 @@ export default function Home() {
               <motion.textarea
                 className="w-full min-h-[100px] rounded-2xl border border-white p-3 focus:outline-none focus:ring-2 focus:ring-white text-base shadow-sm bg-neutral-800/60 text-white placeholder:text-white/60"
                 value={value}
-                onChange={(e) => setAnswer(q.key as any, e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setAnswer(q.key as keyof typeof answers, e.target.value)}
                 tabIndex={0}
                 aria-label={q.question}
                 initial={{ opacity: 0, y: 20 }}
@@ -288,7 +222,7 @@ export default function Home() {
               <motion.input
                 className="w-full rounded-full border border-white p-3 focus:outline-none focus:ring-2 focus:ring-white text-base shadow-sm bg-neutral-800/60 text-white placeholder:text-white/60"
                 value={value}
-                onChange={(e) => setAnswer(q.key as any, e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAnswer(q.key as keyof typeof answers, e.target.value)}
                 tabIndex={0}
                 aria-label={q.question}
                 {...q.inputProps}

@@ -6,9 +6,6 @@ import { motion } from "framer-motion";
 type QuestionPageProps = {
   question: string;
   children: ReactNode;
-  onNext: () => void;
-  onBack?: () => void;
-  disableNext?: boolean;
   progress: number;
   total: number;
 };
@@ -22,9 +19,6 @@ const animationVariants = {
 const QuestionPage = ({
   question,
   children,
-  onNext,
-  onBack,
-  disableNext,
   progress,
   total,
 }: QuestionPageProps) => {
@@ -43,7 +37,6 @@ const QuestionPage = ({
         <h2 className="text-2xl font-semibold mb-4">{question}</h2>
         <div>{children}</div>
       </div>
-      {/* Navigation buttons removed. Only render children. */}
     </motion.div>
   );
 };
