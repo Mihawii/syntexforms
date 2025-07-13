@@ -1,4 +1,4 @@
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useFormContext } from "@/context/FormContext";
 import QuestionPage from "@/components/QuestionPage";
 import { useMemo, useState } from "react";
@@ -96,9 +96,6 @@ const ApplyStepPage = ({ params }: { params: { step: string } }) => {
   return (
     <QuestionPage
       question={q.question}
-      onNext={handleNext}
-      onBack={!isFirst ? handleBack : undefined}
-      disableNext={!value}
       progress={stepIndex + 1}
       total={questions.length}
     >
@@ -111,7 +108,7 @@ const ApplyStepPage = ({ params }: { params: { step: string } }) => {
                 name={q.key}
                 value={opt}
                 checked={value === opt}
-                onChange={() => setAnswer(q.key as any, opt)}
+                onChange={() => setAnswer(q.key as keyof typeof answers, opt)}
                 className="accent-blue-600"
                 tabIndex={0}
                 aria-label={opt}
@@ -125,7 +122,7 @@ const ApplyStepPage = ({ params }: { params: { step: string } }) => {
         <textarea
           className="w-full min-h-[80px] rounded border border-gray-300 dark:border-gray-700 p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
           value={value}
-          onChange={(e) => setAnswer(q.key as any, e.target.value)}
+          onChange={(e) => setAnswer(q.key as keyof typeof answers, e.target.value)}
           tabIndex={0}
           aria-label={q.question}
         />
@@ -134,7 +131,7 @@ const ApplyStepPage = ({ params }: { params: { step: string } }) => {
         <input
           className="w-full rounded border border-gray-300 dark:border-gray-700 p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
           value={value}
-          onChange={(e) => setAnswer(q.key as any, e.target.value)}
+          onChange={(e) => setAnswer(q.key as keyof typeof answers, e.target.value)}
           tabIndex={0}
           aria-label={q.question}
           {...q.inputProps}
@@ -143,6 +140,22 @@ const ApplyStepPage = ({ params }: { params: { step: string } }) => {
       {touched && !value && (
         <div className="text-red-500 text-sm mt-2">This field is required.</div>
       )}
+      <div className="flex justify-between mt-4">
+        <button
+          onClick={handleBack}
+          disabled={isFirst}
+          className="px-4 py-2 bg-gray-500 text-white rounded disabled:opacity-50"
+        >
+          Back
+        </button>
+        <button
+          onClick={handleNext}
+          disabled={!value}
+          className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
+        >
+          {isLast ? "Submit" : "Next"}
+        </button>
+      </div>
     </QuestionPage>
   );
 };

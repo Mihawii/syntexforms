@@ -6,7 +6,7 @@ import { Resend } from "resend";
 const resend = new Resend('re_HG8r8oRB_KwbwfBD4z7dWwgRrfJZSnpeK');
 const SUBMISSIONS_PATH = path.resolve(process.cwd(), "submissions.json");
 
-function answersToHtml(data: Record<string, any>) {
+function answersToHtml(data: Record<string, string>) {
   return `
     <h2>New Syntex Job Application</h2>
     <ul style="font-size:16px;line-height:1.7;">
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     const file = await fs.readFile(SUBMISSIONS_PATH, "utf-8");
     submissions = JSON.parse(file);
     if (!Array.isArray(submissions)) submissions = [];
-  } catch (e) {
+  } catch {
     submissions = [];
   }
   const submission = { ...data, submittedAt: new Date().toISOString() };

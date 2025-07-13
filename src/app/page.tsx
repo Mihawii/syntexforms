@@ -87,13 +87,6 @@ const questions = [
   },
 ];
 
-type ReviewPageProps = {
-  onBack: () => void;
-  onSubmit: () => void;
-  answers: Record<string, string>;
-  submitting: boolean;
-};
-
 const ProgressBar = ({ progress, total }: { progress: number; total: number }) => (
   <div className="w-full mb-8">
     <div className="h-3 bg-white/30 rounded-full overflow-hidden shadow-md border border-white">
@@ -110,7 +103,7 @@ const ProgressBar = ({ progress, total }: { progress: number; total: number }) =
   </div>
 );
 
-const ReviewPage = ({ onBack, onSubmit, answers, submitting }: ReviewPageProps) => (
+const ReviewPage = () => (
   <div className="min-h-screen flex flex-col items-center justify-center bg-black">
     <div className="flex flex-col items-center justify-center w-full max-w-xl mx-auto bg-neutral-900/95 rounded-3xl shadow-2xl p-16 gap-8 border border-white">
       <h2 className="text-4xl font-bold mb-4 text-white text-center">Thank you for applying!</h2>
@@ -120,10 +113,9 @@ const ReviewPage = ({ onBack, onSubmit, answers, submitting }: ReviewPageProps) 
 );
 
 export default function Home() {
-  const { answers, setAnswer, resetForm } = useFormContext();
+  const { answers, setAnswer } = useFormContext();
   const [step, setStep] = useState(0);
-  const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [submitted] = useState(false);
   const q = questions[step];
   const value = answers[q?.key as keyof typeof answers] || "";
   const isLast = step === questions.length - 1;
@@ -136,20 +128,9 @@ export default function Home() {
   const handleBack = () => {
     if (!isFirst) setStep((s) => s - 1);
   };
-  const handleSubmit = async () => {
-    setSubmitting(true);
-    await fetch("/api/apply", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(answers),
-    });
-    setSubmitting(false);
-    setSubmitted(true);
-    resetForm();
-  };
 
   if (submitted) {
-    return <ReviewPage onBack={() => setStep(step - 1)} onSubmit={handleSubmit} answers={answers as Record<string, string>} submitting={submitting} />;
+    return <ReviewPage />;
   }
 
   return (
