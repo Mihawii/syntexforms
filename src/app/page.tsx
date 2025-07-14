@@ -142,7 +142,7 @@ export default function Home() {
       });
       if (!res.ok) throw new Error("Submission failed");
       setSubmitted(true);
-    } catch (err) {
+    } catch {
       setError("There was an error submitting your application. Please try again.");
     } finally {
       setLoading(false);
