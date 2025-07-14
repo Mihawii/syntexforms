@@ -52,8 +52,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error) {
     let message = 'Unknown error';
-    if (error && typeof error === 'object' && 'message' in error) {
-      message = (error as any).message;
+    if (error instanceof Error && error.message) {
+      message = error.message;
     } else if (typeof error === 'string') {
       message = error;
     }
