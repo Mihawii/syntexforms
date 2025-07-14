@@ -130,7 +130,6 @@ export default function Home() {
   const handleBack = () => {
     if (!isFirst) setStep((s) => s - 1);
   };
-
   const handleSubmit = async () => {
     setLoading(true);
     setError(null);
@@ -149,12 +148,33 @@ export default function Home() {
     }
   };
 
+  // Keyboard navigation handler
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      if (q.inputType === 'textarea' && !(e.ctrlKey || e.metaKey)) {
+        // Allow new line in textarea
+        return;
+      }
+      e.preventDefault();
+      if (isLast) {
+        handleSubmit();
+      } else {
+        handleNext();
+      }
+    }
+  };
+
   if (submitted) {
     return <ReviewPage />;
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-black py-8 animate-fade-in">
+    <div
+      className="min-h-screen flex flex-col items-center justify-center bg-black py-8 animate-fade-in"
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
+      aria-label="Application form container"
+    >
       <motion.div
         className="w-full max-w-xl rounded-3xl shadow-2xl bg-neutral-900/95 p-10 backdrop-blur-md border border-white relative"
         initial={{ opacity: 0, y: 40 }}
