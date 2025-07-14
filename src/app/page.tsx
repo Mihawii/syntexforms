@@ -115,7 +115,9 @@ const ReviewPage = () => (
 export default function Home() {
   const { answers, setAnswer } = useFormContext();
   const [step, setStep] = useState(0);
-  const [submitted] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const q = questions[step];
   const value = answers[q?.key as keyof typeof answers] || "";
   const isLast = step === questions.length - 1;
@@ -127,6 +129,24 @@ export default function Home() {
   };
   const handleBack = () => {
     if (!isFirst) setStep((s) => s - 1);
+  };
+
+  const handleSubmit = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/apply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(answers),
+      });
+      if (!res.ok) throw new Error("Submission failed");
+      setSubmitted(true);
+    } catch (err) {
+      setError("There was an error submitting your application. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (submitted) {
@@ -144,15 +164,19 @@ export default function Home() {
       >
         {/* Logo at the top, transparent background, no border, not cropped */}
         <div className="flex justify-center mb-6">
-          <Image
-            src="/branding/logo.svg"
-            alt="Logo"
-            width={96}
-            height={96}
-            className="object-contain"
-            priority
-            style={{ background: 'transparent', objectFit: 'contain', display: 'block' }}
-          />
+          <div className="w-28 h-28 flex items-center justify-center rounded-full bg-white/0 border-0">
+            <Image
+              src="/branding/logo-test.png"
+              alt="Syntex Logo"
+              width={112}
+              height={112}
+              className="object-contain"
+              priority
+              style={{ objectFit: 'contain', display: 'block', maxWidth: '100%', maxHeight: '100%' }}
+              tabIndex={0}
+              aria-label="Syntex logo"
+            />
+          </div>
         </div>
         <ProgressBar progress={step + 1} total={questions.length + 1} />
         <AnimatePresence mode="wait" initial={false}>
@@ -218,22 +242,47 @@ export default function Home() {
               <button
                 type="button"
                 onClick={handleBack}
-                disabled={isFirst}
+                disabled={isFirst || loading}
                 className="w-32 px-6 py-3 rounded-full border border-white text-white bg-transparent hover:bg-white/10 transition-colors duration-200 font-semibold text-lg focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 disabled:opacity-40"
-                style={{ cursor: isFirst ? "not-allowed" : "pointer" }}
+                style={{ cursor: isFirst || loading ? "not-allowed" : "pointer" }}
+                tabIndex={0}
+                aria-label="Back"
               >
                 Back
               </button>
-              <button
-                type="button"
-                onClick={isLast ? () => setStep(step + 1) : handleNext}
-                disabled={!value}
-                className="w-32 px-6 py-3 rounded-full border border-white text-white bg-transparent hover:bg-white/10 transition-colors duration-200 font-semibold text-lg focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 disabled:opacity-40"
-                style={{ cursor: !value ? "not-allowed" : "pointer" }}
-              >
-                Next
-              </button>
+              {isLast ? (
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={!value || loading}
+                  className="w-32 px-6 py-3 rounded-full border border-white text-white bg-transparent hover:bg-white/10 transition-colors duration-200 font-semibold text-lg focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 disabled:opacity-40 flex items-center justify-center"
+                  style={{ cursor: !value || loading ? "not-allowed" : "pointer" }}
+                  tabIndex={0}
+                  aria-label="Submit"
+                >
+                  {loading ? (
+                    <span className="loader border-2 border-t-2 border-white rounded-full w-5 h-5 mr-2 animate-spin" aria-label="Loading"></span>
+                  ) : (
+                    "Submit"
+                  )}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  disabled={!value || loading}
+                  className="w-32 px-6 py-3 rounded-full border border-white text-white bg-transparent hover:bg-white/10 transition-colors duration-200 font-semibold text-lg focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 disabled:opacity-40"
+                  style={{ cursor: !value || loading ? "not-allowed" : "pointer" }}
+                  tabIndex={0}
+                  aria-label="Next"
+                >
+                  Next
+                </button>
+              )}
             </div>
+            {error && (
+              <div className="text-red-500 text-center mt-4" role="alert">{error}</div>
+            )}
           </QuestionPage>
         </AnimatePresence>
       </motion.div>
